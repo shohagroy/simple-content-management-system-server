@@ -1,9 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-// const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+
 const { createToken } = require("./middlewares/createToken");
+const { usersCollection, postsCollection } = require("./mongoDBCollections");
+const { verifyedUser } = require("./middlewares/verifyedUser");
 
 const port = process.env.POST || 5000;
 const app = express();
@@ -12,27 +13,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// const uri = process.env.REACT_APP_DB_URI;
-const uri = "mongodb://localhost:27017";
-
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
-});
-
 const run = async () => {
   try {
-    // database collections
-    const usersCollection = client.db("blogxton").collection("users");
-    const postsCollection = client.db("blogxton").collection("postsCollection");
-    const commentsCollection = client
-      .db("blogxton")
-      .collection("commentsCollection");
-    const notificationCollections = client
-      .db("blogxton")
-      .collection("allNotifications");
-
     // createUser
     app.post("/create-user", createToken, async (req, res) => {
       const newUser = req.body;
@@ -41,8 +23,18 @@ const run = async () => {
     });
 
     // blog publish
-    app.post("/create-blog", (req, res) => {
-      console.log(req.body);
+    app.post("/create-blog", verifyedUser, async (req, res) => {
+      const newPost = req.body;
+      const result = await postsCollection.insertOne(newPost);
+      console.log(result);
+      res.send(result);
+    });
+
+    app.get("/all-post", async (req, res) => {
+      console.log("get data call");
+      const query = {};
+      const result = await postsCollection.find(query).toArray();
+      res.send(result);
     });
   } finally {
   }
