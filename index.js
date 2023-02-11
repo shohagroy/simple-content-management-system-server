@@ -3,8 +3,16 @@ const cors = require("cors");
 require("dotenv").config();
 
 const { createToken } = require("./middlewares/createToken");
-const { usersCollection, postsCollection } = require("./mongoDBCollections");
+const {
+  usersCollection,
+  postsCollection,
+  commentsCollection,
+} = require("./mongoDBCollections");
 const { verifyedUser } = require("./middlewares/verifyedUser");
+const { ObjectId } = require("mongodb");
+const { updatePostView } = require("./middlewares/postViewerUpdate");
+const { publicCommentUpdate } = require("./middlewares/publicCommentUpdate");
+// const {  } = require("");
 
 const port = process.env.POST || 5000;
 const app = express();
@@ -30,10 +38,25 @@ const run = async () => {
       res.send(result);
     });
 
+    // get all post
     app.get("/all-post", async (req, res) => {
-      console.log("get data call");
       const query = {};
       const result = await postsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get single post search by id
+    app.get("/blog/:id", updatePostView, async (req, res) => {
+      res.send(req.result);
+    });
+    app.post("/postComment", publicCommentUpdate, async (req, res) => {
+      console.log(req.result);
+      res.send(req.result);
+    });
+    app.get("/postComments", async (req, res) => {
+      const postId = req.query.id;
+      const query = { postId: postId };
+      const result = await commentsCollection.find(query).toArray();
       res.send(result);
     });
   } finally {

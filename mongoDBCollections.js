@@ -22,4 +22,6 @@ const notificationCollections = client
 module.exports = {
   usersCollection,
   postsCollection,
+  ObjectId,
+  commentsCollection,
 };
