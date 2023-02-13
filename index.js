@@ -12,6 +12,7 @@ const { verifyedUser } = require("./middlewares/verifyedUser");
 const { ObjectId } = require("mongodb");
 const { updatePostView } = require("./middlewares/postViewerUpdate");
 const { publicCommentUpdate } = require("./middlewares/publicCommentUpdate");
+const { postUpdated } = require("./middlewares/postUpdated");
 // const {  } = require("");
 
 const port = process.env.POST || 5000;
@@ -31,10 +32,10 @@ const run = async () => {
     });
 
     // blog publish
-    app.post("/create-blog", verifyedUser, async (req, res) => {
+    app.post("/create-blog", async (req, res) => {
+      console.log(req.body);
       const newPost = req.body;
       const result = await postsCollection.insertOne(newPost);
-      console.log(result);
       res.send(result);
     });
 
@@ -53,11 +54,37 @@ const run = async () => {
       console.log(req.result);
       res.send(req.result);
     });
+
     app.get("/postComments", async (req, res) => {
       const postId = req.query.id;
       const query = { postId: postId };
       const result = await commentsCollection.find(query).toArray();
       res.send(result);
+    });
+
+    app.post("/publicComment", async (req, res) => {
+      const publicComment = req.body;
+      const result = await commentsCollection.insertOne(publicComment);
+
+      res.send(result);
+    });
+
+    app.get("/allComments", async (req, res) => {
+      const query = {};
+      const result = await commentsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/dashbord-data", async (req, res) => {
+      const userEmail = req.query.email;
+      const query = { authorEmail: userEmail };
+
+      const userPost = await postsCollection.find(query).toArray();
+      res.send(userPost);
+    });
+
+    app.put("/post-update", postUpdated, async (req, res) => {
+      res.send(req.result);
     });
   } finally {
   }

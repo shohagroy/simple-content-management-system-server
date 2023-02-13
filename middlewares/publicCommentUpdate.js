@@ -28,8 +28,6 @@ const publicCommentUpdate = async (req, res, next) => {
     req.result = result;
     next();
   }
-
-  console.log(publicComment);
 };
 
 module.exports = {
